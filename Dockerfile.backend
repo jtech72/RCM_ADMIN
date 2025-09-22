@@ -1,0 +1,34 @@
+# Multi-stage build for Node.js backend
+FROM node:18-alpine AS base
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY backend/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY backend/ ./
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S backend -u 1001
+
+# Create logs directory
+RUN mkdir -p logs && chown -R backend:nodejs logs
+
+# Switch to non-root user
+USER backend
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node utils/healthCheck.js || exit 1
+
+# Start the application
+CMD ["npm", "start"]

@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.dark-primary {
+  background-color: #313a46;
+}
+
+button {
+  background-color: #6169d0 !important;
+  color: white !important;
+}
+
+body {
+  background-color: #f4f5f9 !important;
+}
