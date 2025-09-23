@@ -39,81 +39,99 @@ function FileUpload({
         }
 
         // Validate files
+        const errors = [];
         for (const file of fileArray) {
-            const validation = s3Service.validateFile(file, {
-                allowedTypes: accept.split(',').map(type => type.trim()),
-                maxSize
-            });
+            // Check file type
+            if (accept && !accept.split(',').some(type => {
+                const trimmedType = type.trim();
+                return file.type === trimmedType || 
+                       (trimmedType.endsWith('/*') && file.type.startsWith(trimmedType.slice(0, -1)));
+            })) {
+                errors.push(`File type ${file.type} is not allowed`);
+            }
 
-            if (!validation.valid) {
-                setError(validation.errors.join(', '));
-                if (onError) onError(validation.errors);
-                return;
+            // Check file size
+            if (file.size > maxSize) {
+                const maxSizeMB = (maxSize / (1024 * 1024)).toFixed(1);
+                errors.push(`File ${file.name} exceeds ${maxSizeMB}MB limit`);
+            }
+
+            // Check if file is empty
+            if (file.size === 0) {
+                errors.push(`File ${file.name} is empty`);
             }
         }
 
+        if (errors.length > 0) {
+            setError(errors.join(', '));
+            if (onError) onError(errors);
+            return;
+        }
+
+        console.log('Files to upload:', fileArray.map(f => ({ name: f.name, type: f.type, size: f.size })));
+        console.log('Upload folder:', folder);
+        console.log('Max size:', maxSize);
+
         // Upload files
         await uploadFiles(fileArray);
-    }, [accept, maxSize, multiple, onError]);
+    }, [accept, maxSize, multiple, onError, folder]);
 
     /**
      * Upload files to S3
      */
     const uploadFiles = async (files) => {
+        console.log('Starting upload process...');
         setUploading(true);
         setError(null);
         setUploadProgress(0);
 
         try {
             if (multiple) {
-                // Upload multiple files
-                const results = await s3Service.uploadMultipleFiles(
-                    files,
-                    folder,
-                    (progressData) => {
-                        const overallProgress = Math.round(
-                            ((progressData.fileIndex * 100) + progressData.progress) / files.length
-                        );
-                        setUploadProgress(overallProgress);
-                    }
-                );
-
-                const successfulUploads = results.filter(result => result.success);
-                const failedUploads = results.filter(result => !result.success);
-
-                if (failedUploads.length > 0) {
-                    setError(`Failed to upload ${failedUploads.length} file(s)`);
-                    if (onError) onError(failedUploads.map(f => f.error));
-                }
-
-                if (successfulUploads.length > 0) {
-                    setUploadedFile(successfulUploads);
-                    if (onUpload) onUpload(successfulUploads.map(f => f.data));
-                }
+                console.log('Multiple file upload not implemented yet');
+                setError('Multiple file upload not supported yet');
+                return;
             } else {
                 // Upload single file
                 const file = files[0];
-                const uniqueFileName = s3Service.generateUniqueFileName(file.name);
-                const renamedFile = new File([file], uniqueFileName, { type: file.type });
+                console.log('Uploading single file:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    folder: folder
+                });
 
+                console.log('Calling s3Service.uploadFile...');
                 const result = await s3Service.uploadFile(
-                    renamedFile,
+                    file,
                     folder,
-                    (progress) => setUploadProgress(progress)
+                    (progress) => {
+                        console.log('Upload progress:', progress + '%');
+                        setUploadProgress(progress);
+                    }
                 );
 
-                if (result.success) {
+                console.log('Upload result:', result);
+
+                if (result && result.success) {
+                    console.log('Upload successful, setting uploaded file:', result.data);
                     setUploadedFile(result.data);
-                    if (onUpload) onUpload(result.data);
+                    if (onUpload) {
+                        console.log('Calling onUpload callback');
+                        onUpload(result.data);
+                    }
                 } else {
-                    setError(result.error);
-                    if (onError) onError([result.error]);
+                    const errorMsg = result?.error || 'Upload failed - no result returned';
+                    console.error('Upload failed:', errorMsg);
+                    setError(errorMsg);
+                    if (onError) onError([errorMsg]);
                 }
             }
         } catch (err) {
-            console.error('Upload error:', err);
-            setError('Upload failed. Please try again.');
-            if (onError) onError([err.message]);
+            console.error('Upload error caught:', err);
+            console.error('Error stack:', err.stack);
+            const errorMsg = err.message || 'Upload failed. Please try again.';
+            setError(errorMsg);
+            if (onError) onError([errorMsg]);
         } finally {
             setUploading(false);
             setUploadProgress(0);

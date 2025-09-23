@@ -7,7 +7,7 @@ require('dotenv').config();
 
 // Add better error handling for uncaught exceptions
 process.on('uncaughtException', (err) => {
-    console.error('💥 UNCAUGHT EXCEPTION! Shutting down...');
+    console.error('UNCAUGHT EXCEPTION! Shutting down...');
     console.error('Error name:', err.name);
     console.error('Error message:', err.message);
     console.error('Stack trace:', err.stack);
@@ -15,14 +15,14 @@ process.on('uncaughtException', (err) => {
 });
 
 process.on('unhandledRejection', (err) => {
-    console.error('💥 UNHANDLED REJECTION! Shutting down...');
+    console.error('UNHANDLED REJECTION! Shutting down...');
     console.error('Error:', err);
     process.exit(1);
 });
 
 const dbConnection = require('./config/database');
 const logger = require('./utils/logger');
-const { globalErrorHandler } = require('./middleware/errorHandler');
+// const { globalErrorHandler } = require('./middleware/errorHandler');
 const requestLogger = require('./middleware/requestLogger');
 
 // Import routes with error handling
@@ -31,29 +31,29 @@ let blogRoutes, authRoutes, analyticsRoutes, userRoutes, logRoutes, s3Routes, ca
 try {
     console.log('Loading routes...');
     blogRoutes = require('./routes/blogRoutes');
-    console.log('✅ Blog routes loaded');
+    console.log('Blog routes loaded');
 
     authRoutes = require('./routes/authRoutes');
-    console.log('✅ Auth routes loaded');
+    console.log('Auth routes loaded');
 
     analyticsRoutes = require('./routes/analyticsRoutes');
-    console.log('✅ Analytics routes loaded');
+    console.log('Analytics routes loaded');
 
     userRoutes = require('./routes/userRoutes');
-    console.log('✅ User routes loaded');
+    console.log('User routes loaded');
 
     logRoutes = require('./routes/logRoutes');
-    console.log('✅ Log routes loaded');
+    console.log('Log routes loaded');
 
     s3Routes = require('./routes/s3Routes');
-    console.log('✅ S3 routes loaded');
+    console.log('S3 routes loaded');
 
     categoryRoutes = require('./routes/categoryRoutes');
-    console.log('✅ Category routes loaded');
+    console.log('Category routes loaded');
 
-    console.log('✅ All routes loaded successfully');
+    console.log('All routes loaded successfully');
 } catch (error) {
-    console.error('❌ Error loading routes:', error.message);
+    console.error('Error loading routes:', error.message);
     console.error('Stack:', error.stack);
     process.exit(1);
 }
@@ -69,35 +69,23 @@ if (process.env.NODE_ENV !== 'test') {
 // Security middleware
 app.use(helmet());
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.'
-});
-app.use(limiter);
+// // Rate limiting
+// const limiter = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 100, // limit each IP to 100 requests per windowMs
+//     message: 'Too many requests from this IP, please try again later.'
+// });
+// app.use(limiter);
 
 // CORS configuration
-const allowedOrigins = [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    process.env.ADMIN_URL || 'http://localhost:3001',
-    'http://localhost:5173', // Vite dev server default port
-    'http://localhost:4173'  // Vite preview server default port
-];
+// const allowedOrigins = [
+//     process.env.FRONTEND_URL || 'http://localhost:3000',
+//     process.env.ADMIN_URL || 'http://localhost:3001',
+//     'http://localhost:5173', // Vite dev server default port
+//     'http://localhost:4173'  // Vite preview server default port
+// ];
 
-app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true
-}));
+app.use(cors({ origin: "*" }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -137,7 +125,7 @@ app.use('*', (req, res) => {
 });
 
 // Global error handler
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 // Start server
 if (process.env.NODE_ENV !== 'test') {

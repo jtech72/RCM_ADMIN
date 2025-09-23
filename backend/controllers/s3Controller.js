@@ -69,7 +69,11 @@ const getPresignedUrl = async (req, res) => {
         res.json({
             success: true,
             message: 'Presigned URL generated successfully',
-            data: result.data
+            data: {
+                uploadUrl: result.data.presignedUrl,
+                fileUrl: result.data.fileUrl,
+                fileKey: result.data.fileKey
+            }
         });
 
     } catch (error) {

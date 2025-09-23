@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Filter, Plus } from 'lucide-react';
 import { getUsers, deleteUser, updateUserStatus, getUserRoles, getUserStatusOptions } from '../../services/user.js';
 
 function UserList({ onCreateUser, onEditUser }) {
@@ -18,6 +19,8 @@ function UserList({ onCreateUser, onEditUser }) {
         role: '',
         status: ''
     });
+
+    const [showFilters, setShowFilters] = useState(false);
 
     const roles = getUserRoles();
     const statusOptions = getUserStatusOptions();
@@ -129,74 +132,80 @@ function UserList({ onCreateUser, onEditUser }) {
 
     return (
         <div className="space-y-6">
-            {/* Header with Create Button */}
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">Users</h2>
-                <button
-                    onClick={onCreateUser}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors"
-                >
-                    + Create User
-                </button>
-            </div>
+            {/* Search and Filters */}
+            <div>
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <form onSubmit={handleSearch} className="flex-1 flex items-center justify-end gap-4">
+                        <div className="w-64">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search users..."
+                                    value={filters.search}
+                                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
 
-            {/* Filters */}
-            <div className="bg-white flex justify-end items-center p-4 rounded-lg shadow">
-                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Search */}
-                    <div>
-                        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
-                            Search
-                        </label>
-                        <input
-                            type="text"
-                            id="search"
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
-                            placeholder="Search users..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Role Filter */}
-                    <div>
-                        <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-                            Role
-                        </label>
-                        <select
-                            id="role"
-                            value={filters.role}
-                            onChange={(e) => handleFilterChange('role', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        <button
+                            type="button"
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            <option value="">All Roles</option>
-                            {roles.map(role => (
-                                <option key={role.value} value={role.value}>
-                                    {role.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Status Filter */}
-                    <div>
-                        <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
-                        </label>
-                        <select
-                            id="status"
-                            value={filters.status}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            <Filter className="h-4 w-4 mr-2" />
+                            Filters
+                        </button>
+                        <button
+                            onClick={onCreateUser}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            {statusOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create User
+                        </button>
+                    </form>
+                </div>
+
+                {/* Advanced Filters */}
+                {showFilters && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Role
+                            </label>
+                            <select
+                                value={filters.role}
+                                onChange={(e) => handleFilterChange('role', e.target.value)}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">All Roles</option>
+                                {roles.map(role => (
+                                    <option key={role.value} value={role.value}>
+                                        {role.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Status
+                            </label>
+                            <select
+                                value={filters.status}
+                                onChange={(e) => handleFilterChange('status', e.target.value)}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                {statusOptions.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </form>
+                )}
             </div>
 
             {/* Error Message */}

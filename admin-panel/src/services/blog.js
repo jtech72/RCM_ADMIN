@@ -56,13 +56,9 @@ const blogService = {
     },
 
     // Toggle featured status
-    toggleFeatured: async (id) => {
-        const blog = await blogService.getBlog(id);
-        if (blog.success) {
-            const response = await api.patch(`/blogs/${id}`, { featured: !blog.data.featured });
-            return response.data;
-        }
-        return blog;
+    toggleFeatured: async (id, currentFeatured) => {
+        const response = await api.patch(`/blogs/${id}`, { featured: !currentFeatured });
+        return response.data;
     }
 };
 

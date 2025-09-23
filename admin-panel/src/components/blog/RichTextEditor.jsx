@@ -53,7 +53,7 @@ function RichTextEditor({
                 [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                 [{ 'direction': 'rtl' }],
                 [{ 'align': [] }],
-                ['link', 'image', 'video', 'formula'],
+                ['link', 'formula'],
                 ['code-block'],
                 ['blockquote'],
                 ['clean']

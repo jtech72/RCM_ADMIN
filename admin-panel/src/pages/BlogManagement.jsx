@@ -51,7 +51,7 @@ function BlogManagement() {
 
                 {currentView === 'edit' && selectedBlog && (
                     <BlogForm
-                        blog={selectedBlog}
+                        blogSlug={selectedBlog?.slug}
                         mode="edit"
                         onSave={handleSaveBlog}
                         onCancel={handleCancelForm}

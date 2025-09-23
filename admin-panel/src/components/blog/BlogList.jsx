@@ -128,9 +128,9 @@ function BlogList({ onCreateBlog, onEditBlog }) {
     };
 
     // Handle toggle featured
-    const handleToggleFeatured = async (blogId) => {
+    const handleToggleFeatured = async (blogId, currentFeatured) => {
         try {
-            const response = await blogService.toggleFeatured(blogId);
+            const response = await blogService.toggleFeatured(blogId, currentFeatured);
             if (response.success) {
                 loadBlogs(); // Reload the list
             } else {
@@ -334,9 +334,6 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                                         <h3 className="text-sm font-medium text-gray-900 truncate">
                                                             {blog.title}
                                                         </h3>
-                                                        {blog.featured && (
-                                                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                                        )}
                                                     </div>
                                                     <p className="text-sm text-gray-500 truncate">
                                                         {blog?.excerpt?.length > 80 ? blog?.excerpt?.slice(0, 79) + '...' : blog?.excerpt}
@@ -373,15 +370,9 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center">
-                                                    <Eye className="h-3 w-3 mr-1" />
-                                                    {blog.viewCount || 0} views
-                                                </div>
-                                                <div className="flex items-center">
-                                                    <span className="text-red-500 mr-1">♥</span>
-                                                    {blog.likeCount || 0} likes
-                                                </div>
+                                            <div className="flex items-center">
+                                                <Eye className="h-3 w-3 mr-1" />
+                                                {blog.viewCount || 0} views
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -400,9 +391,9 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-2">
                                                 <button
-                                                    onClick={() => handleToggleFeatured(blog._id)}
-                                                    className={`p-1 rounded ${blog.featured
-                                                        ? 'text-yellow-600 hover:text-yellow-700'
+                                                    onClick={() => handleToggleFeatured(blog._id, blog.featured)}
+                                                    className={`p-1 rounded ${blog?.featured
+                                                        ? 'text-yellow-400 hover:text-yellow-700'
                                                         : 'text-gray-400 hover:text-yellow-600'
                                                         }`}
                                                     title={blog.featured ? 'Remove from featured' : 'Mark as featured'}

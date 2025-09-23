@@ -35,7 +35,7 @@ const createBlog = catchAsync(async (req, res) => {
         featured,
         seoMetadata
     } = req.body;
-
+    console.log(req.body)
     // Validate required fields
     if (!title || !content || !excerpt || !category) {
         throw new ValidationError('Title, content, excerpt, and category are required');
@@ -94,6 +94,11 @@ const createBlog = catchAsync(async (req, res) => {
     }
 
     try {
+        // If setting as featured, unfeature all other blogs
+        if (blogData.featured) {
+            await Blog.updateMany({ featured: true }, { featured: false });
+        }
+
         // Create and save blog
         const blog = new Blog(blogData);
         await blog.save();
@@ -123,92 +128,6 @@ const createBlog = catchAsync(async (req, res) => {
         throw new DatabaseError(`Failed to create blog post: ${error.message}`);
     }
 });
-
-/**
- * Get blogs with pagination, filtering, and search
- * GET /api/blogs
- * Public endpoint (no authentication required)
- */
-// const getBlogs = async (req, res) => {
-//     try {
-//         const {
-//             page = 1,
-//             limit = 10,
-//             status,
-//             category,
-//             tags,
-//             query: search,
-//             featured,
-//             author,
-//             exclude,
-//             sortBy = 'createdAt',
-//             sortOrder = 'desc'
-//         } = req.query;
-
-//         // Prepare search parameters for optimized search
-//         const searchParams = {
-//             query: search,
-//             category,
-//             tags: tags ? tags.split(',').map(tag => tag.trim()) : undefined,
-//             status: (!status || status === 'all') ? undefined : status,
-//             // status: status === 'all' ? undefined : status,
-//             featured,
-//             author,
-//             page: parseInt(page),
-//             limit: parseInt(limit),
-//             sortBy,
-//             sortOrder
-//         };
-
-//         // Add exclude filter if provided (for related posts)
-//         let filter = {};
-//         if (exclude) {
-//             filter._id = { $ne: exclude };
-//         }
-
-//         // Use optimized search with performance monitoring
-//         const result = await monitorQuery(
-//             () => searchBlogs(searchParams),
-//             `getBlogs - page:${page}, limit:${limit}, search:${search || 'none'}`
-//         );
-
-//         // If exclude filter is needed, apply it manually
-//         if (exclude && result.data.data) {
-//             result.data.data = result.data.data.filter(blog => blog._id.toString() !== exclude);
-//             result.data.pagination.total -= 1;
-//         }
-
-//         res.status(200).json({
-//             success: true,
-//             data: result.data.data,
-//             pagination: result.data.pagination,
-//             filters: {
-//                 status: searchParams.status,
-//                 category,
-//                 tags,
-//                 search,
-//                 featured,
-//                 author,
-//                 sortBy,
-//                 sortOrder
-//             },
-//             performance: {
-//                 executionTime: result.performance.executionTime,
-//                 optimized: true
-//             }
-//         });
-
-//     } catch (error) {
-//         console.error('Get blogs error:', error);
-
-//         res.status(500).json({
-//             success: false,
-//             error: 'Failed to retrieve blogs',
-//             details: error.message
-//         });
-//     }
-// };
-
 
 const getBlogs = async (req, res) => {
     try {
@@ -403,7 +322,13 @@ const updateBlog = async (req, res) => {
             updateData.category = category.trim();
         }
         if (status !== undefined) updateData.status = status;
-        if (featured !== undefined) updateData.featured = featured;
+        if (featured !== undefined) {
+            updateData.featured = featured;
+            // If setting as featured, unfeatured all other blogs
+            if (featured === true) {
+                await Blog.updateMany({ _id: { $ne: id } }, { featured: false });
+            }
+        }
 
         // Handle cover image
         if (coverImage !== undefined) {

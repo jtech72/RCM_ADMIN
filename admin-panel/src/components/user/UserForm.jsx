@@ -158,7 +158,7 @@ function UserForm({ user = null, mode = 'create', onSave, onCancel }) {
     };
 
     return (
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto">
             <div className="bg-white shadow rounded-lg">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <h3 className="text-lg font-medium text-gray-900">

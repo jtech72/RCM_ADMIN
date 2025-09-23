@@ -50,7 +50,7 @@ function CategoryManager({
             {/* Category Selection */}
             <div>
                 <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
+                    Category <span className='text-red-500'>*</span>
                 </label>
                 <div className="flex gap-2">
                     <select

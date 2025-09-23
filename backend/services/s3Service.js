@@ -11,6 +11,7 @@ const ALLOWED_FILE_TYPES = {
     'image/png': { extension: 'png', maxSize: 5 * 1024 * 1024 },
     'image/gif': { extension: 'gif', maxSize: 2 * 1024 * 1024 }, // 2MB
     'image/webp': { extension: 'webp', maxSize: 5 * 1024 * 1024 },
+    'image/avif': { extension: 'avif', maxSize: 5 * 1024 * 1024 },
 
     // Documents
     'application/pdf': { extension: 'pdf', maxSize: 10 * 1024 * 1024 }, // 10MB
@@ -113,7 +114,6 @@ const generatePresignedUrl = async ({
             Bucket: bucketInfo.bucketName,
             Key: fileKey,
             ContentType: contentType,
-            ContentLength: fileSize,
             Expires: expiresIn,
             // Add metadata
             Metadata: {
@@ -136,8 +136,7 @@ const generatePresignedUrl = async ({
                 fileUrl,
                 expiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
                 uploadHeaders: {
-                    'Content-Type': contentType,
-                    'Content-Length': fileSize.toString()
+                    'Content-Type': contentType
                 }
             }
         };
