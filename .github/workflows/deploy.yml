@@ -25,7 +25,7 @@ jobs:
         echo ".env file copied from backup."
 
     - name: Set execute permission for deploy.sh
-      run: docker-compose -f docker-compose-dev.yaml up -d --build
+      run: docker-compose -f docker-compose.prod.yml up -d --build
 
     - name: Remove build cache
       run: docker system prune -a -f
