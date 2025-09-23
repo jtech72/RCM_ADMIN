@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.0.109:5000/api';
 
 /**
  * S3 Service for handling file uploads and management
@@ -60,7 +60,23 @@ class S3Service {
      */
     async uploadFile(file, folder = 'uploads', onProgress = null) {
         try {
+            console.log('s3Service.uploadFile called with:', {
+                fileName: file.name,
+                contentType: file.type,
+                fileSize: file.size,
+                folder,
+                apiBaseUrl: this.api.defaults.baseURL
+            });
+
+            // Check if we have auth token
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                throw new Error('Authentication token not found. Please login again.');
+            }
+            console.log('Auth token found:', token ? 'Yes' : 'No');
+
             // Get presigned URL
+            console.log('Getting presigned URL...');
             const presignedData = await this.getPresignedUrl({
                 fileName: file.name,
                 contentType: file.type,
@@ -68,28 +84,48 @@ class S3Service {
                 folder
             });
 
-            if (!presignedData.success) {
-                throw new Error(presignedData.error);
+            console.log('Presigned URL response:', presignedData);
+
+            if (!presignedData || !presignedData.success) {
+                const errorMsg = presignedData?.error || 'Failed to get presigned URL';
+                throw new Error(errorMsg);
             }
 
             const { uploadUrl, fileUrl, fileKey } = presignedData.data;
 
+            if (!uploadUrl || !fileUrl || !fileKey) {
+                console.error('Missing required data in presigned response:', presignedData.data);
+                throw new Error('Invalid presigned URL response - missing required fields');
+            }
+
+            console.log('Upload URL obtained:', {
+                uploadUrl: uploadUrl.substring(0, 100) + '...',
+                fileUrl,
+                fileKey
+            });
+
             // Upload file to S3 using presigned URL
+            console.log('Starting S3 upload...');
             const uploadResponse = await axios.put(uploadUrl, file, {
                 headers: {
                     'Content-Type': file.type,
                 },
+                timeout: 60000, // 60 seconds timeout
                 onUploadProgress: (progressEvent) => {
-                    if (onProgress) {
+                    if (onProgress && progressEvent.total) {
                         const percentCompleted = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
+                        console.log('S3 upload progress:', percentCompleted + '%');
                         onProgress(percentCompleted);
                     }
                 }
             });
 
+            console.log('S3 upload response status:', uploadResponse.status);
+
             if (uploadResponse.status === 200) {
+                console.log('Upload successful!');
                 return {
                     success: true,
                     data: {
@@ -101,13 +137,35 @@ class S3Service {
                     }
                 };
             } else {
-                throw new Error('Upload failed');
+                throw new Error(`Upload failed with status: ${uploadResponse.status}`);
             }
         } catch (error) {
             console.error('Error uploading file:', error);
+
+            // Provide more specific error messages
+            let errorMessage = 'Failed to upload file';
+
+            if (error.response) {
+                console.error('Error response:', error.response.status, error.response.data);
+                if (error.response.status === 401) {
+                    errorMessage = 'Authentication failed. Please login again.';
+                } else if (error.response.status === 403) {
+                    errorMessage = 'Access denied. Check your permissions.';
+                } else if (error.response.status >= 500) {
+                    errorMessage = 'Server error. Please try again later.';
+                } else {
+                    errorMessage = error.response.data?.error || error.message;
+                }
+            } else if (error.request) {
+                console.error('No response received:', error.request);
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                errorMessage = error.message;
+            }
+
             return {
                 success: false,
-                error: error.message || 'Failed to upload file'
+                error: errorMessage
             };
         }
     }
@@ -222,6 +280,7 @@ class S3Service {
                 'image/png',
                 'image/gif',
                 'image/webp',
+                'image/avif',
                 'application/pdf',
                 'text/plain',
                 'application/msword',

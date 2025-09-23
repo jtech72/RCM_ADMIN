@@ -190,16 +190,12 @@ const searchBlogs = async (searchParams = {}) => {
 
     // Add text search if query provided
     if (query && query.trim()) {
-        try {
-            filter.$text = { $search: query.trim() };
-        } catch (error) {
-            // Fallback to regex search if text index is not available
-            filter.$or = [
-                { title: { $regex: query.trim(), $options: 'i' } },
-                { content: { $regex: query.trim(), $options: 'i' } },
-                { excerpt: { $regex: query.trim(), $options: 'i' } }
-            ];
-        }
+        // Use regex search for better compatibility
+        filter.$or = [
+            { title: { $regex: query.trim(), $options: 'i' } },
+            { content: { $regex: query.trim(), $options: 'i' } },
+            { excerpt: { $regex: query.trim(), $options: 'i' } }
+        ];
     }
 
     // Add category filter
@@ -229,17 +225,11 @@ const searchBlogs = async (searchParams = {}) => {
 
     // Build sort object
     const sort = {};
-    if (query && query.trim()) {
-        // If text search, sort by text score first, then by specified field
-        sort.score = { $meta: 'textScore' };
-        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
-    } else {
-        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
-    }
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Optimized field selection for blog list
+    // Include all fields including content for admin panel
     const select =
-        'title slug excerpt coverImage category tags status featured readingTime viewCount likeCount author createdAt updatedAt';
+        'title slug excerpt content coverImage category tags status featured readingTime viewCount likeCount author createdAt updatedAt seoMetadata';
 
     // Population for author info
     const populate = {

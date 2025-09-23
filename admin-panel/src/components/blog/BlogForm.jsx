@@ -1,18 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, X, Eye, EyeOff } from 'lucide-react';
 import blogService from '../../services/blog.js';
-import RichTextEditor from './RichTextEditor.jsx';
+import 'react-quill/dist/quill.snow.css';
 import FileUpload from '../common/FileUpload.jsx';
 import ContentPreview from './ContentPreview.jsx';
 import CategoryManager from './CategoryManager.jsx';
 import TagManager from './TagManager.jsx';
 import SEOMetadataForm from './SEOMetadataForm.jsx';
+import ReactQuill from 'react-quill';
 
-function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
+function BlogForm({ blogSlug, onSave, onCancel, mode = 'create' }) {
+
+    // QUILL
+    const quillRef = useRef(null);
+
+    // Custom toolbar configuration
+    const modules = {
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                [{ 'font': [] }],
+                [{ 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'script': 'sub' }, { 'script': 'super' }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                [{ 'direction': 'rtl' }],
+                [{ 'align': [] }],
+                ['link', 'formula'],
+                ['code-block'],
+                ['blockquote'],
+                ['clean']
+            ],
+        },
+        clipboard: {
+            matchVisual: false
+        }
+    };
+
+    const formats = [
+        'header', 'font', 'size',
+        'bold', 'italic', 'underline', 'strike',
+        'color', 'background',
+        'script',
+        'list', 'bullet', 'indent',
+        'direction', 'align',
+        'link', 'image', 'video', 'formula',
+        'code-block', 'blockquote'
+    ];
+
+    // ////////////////////
+
+
+
+    const [blog, setBlog] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         excerpt: '',
-        content: '',
         category: '',
         tags: [],
         status: 'draft',
@@ -29,22 +73,40 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
         }
     });
 
+    const [blogContent, setBlogContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showPreview, setShowPreview] = useState(false);
-
     // Tag management
     const [availableTags, setAvailableTags] = useState([
         'medicalBilling', 'medicalCoding', 'EHR', 'AIINHEALTHCARE', 'HEALTHCARE', 'guide', 'tips'
     ]);
 
     // Initialize form data when blog prop changes
+
+    const fetchBlugBySlug = async () => {
+        try {
+            const response = await blogService.getBlog(blogSlug);
+            if (response?.success) {
+                setBlog(response?.data);
+            }
+        } catch (error) {
+            console.log(error, 'Error fetching blog details');
+        }
+    }
+
     useEffect(() => {
-        if (blog && mode === 'edit') {
+        if (blogSlug && mode === 'edit') {
+            fetchBlugBySlug();
+        }
+    }, [mode]);
+
+    useEffect(() => {
+        if (blog) {
+            setBlogContent(blog.content)
             setFormData({
                 title: blog.title || '',
                 excerpt: blog.excerpt || '',
-                content: blog.content || '',
                 category: blog.category || '',
                 tags: blog.tags || [],
                 status: blog.status || 'draft',
@@ -61,9 +123,8 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
                 }
             });
         }
-    }, [blog, mode]);
+    }, [blog])
 
-    // Handle form field changes
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
@@ -117,6 +178,7 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
 
         try {
             let response;
+            formData.content = blogContent;
             if (mode === 'create') {
                 response = await blogService.createBlog(formData);
             } else {
@@ -186,7 +248,7 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="lg:col-span-2">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                            Title *
+                            Title <span className='text-red-500'>*</span>
                         </label>
                         <input
                             type="text"
@@ -215,7 +277,7 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
 
                     <div>
                         <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                            Status *
+                            Status <span className='text-red-500'>*</span>
                         </label>
                         <select
                             id="status"
@@ -251,22 +313,32 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
                 {/* Content */}
                 <div>
                     <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                        Content *
+                        Content <span className='text-red-500'>*</span>
                     </label>
-                    {showPreview ? (
+                    <div style={{ height: '400px', display: showPreview ? 'none' : 'block' }}>
+
+                        <ReactQuill
+                            ref={quillRef}
+                            theme="snow"
+                            value={blogContent}
+                            onChange={(content) => setBlogContent(content)}
+                            placeholder={"Start writing your content..."}
+                            modules={modules}
+                            formats={formats}
+                            // readOnly={loading}
+                            style={{
+                                height: '350px',
+                                minHeight: '350px'
+                            }}
+                        />
+                    </div>
+                    <div style={{ display: showPreview ? 'block' : 'none' }}>
                         <ContentPreview
                             blog={formData}
-                            className="border border-gray-300 rounded-md"
+                            blogContent={blogContent}
+                            className="border border-gray-300 rounded-md min-h-[400px] p-4"
                         />
-                    ) : (
-                        <RichTextEditor
-                            value={formData.content}
-                            onChange={(content) => setFormData(prev => ({ ...prev, content }))}
-                            placeholder="Start writing your blog content..."
-                            height="400px"
-                            disabled={loading}
-                        />
-                    )}
+                    </div>
                 </div>
 
                 {/* Tags */}
@@ -290,7 +362,7 @@ function BlogForm({ blog, onSave, onCancel, mode = 'create' }) {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div>
                             <FileUpload
-                                accept="image/*"
+                                accept="image/jpeg,image/png,image/gif,image/webp,image/avif"
                                 maxSize={5 * 1024 * 1024} // 5MB
                                 folder="blog-covers"
                                 onUpload={(fileData) => {

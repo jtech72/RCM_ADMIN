@@ -66,11 +66,11 @@ const createCategory = catchAsync(async (req, res) => {
  * Public endpoint
  */
 const getCategories = catchAsync(async (req, res) => {
-    const { 
-        includeInactive = false, 
+    const {
+        includeInactive = false,
         withBlogCount = true,
         page = 1,
-        limit = 10,
+        limit = 20,
         search = ''
     } = req.query;
 
@@ -104,9 +104,9 @@ const getCategories = catchAsync(async (req, res) => {
     // Optionally include actual blog counts
     if (withBlogCount) {
         for (let category of categories) {
-            const actualCount = await Blog.countDocuments({ 
-                category: category.name, 
-                status: 'published' 
+            const actualCount = await Blog.countDocuments({
+                category: category.name,
+                status: 'published'
             });
             category.actualBlogCount = actualCount;
         }
@@ -141,9 +141,9 @@ const getCategoryBySlug = catchAsync(async (req, res) => {
     }
 
     // Get actual blog count
-    const actualBlogCount = await Blog.countDocuments({ 
-        category: category.name, 
-        status: 'published' 
+    const actualBlogCount = await Blog.countDocuments({
+        category: category.name,
+        status: 'published'
     });
 
     const categoryObj = category.toObject();
@@ -186,7 +186,7 @@ const updateCategory = catchAsync(async (req, res) => {
                 { category: existingCategory.name },
                 { category: name.trim() }
             );
-            
+
             logger.info('Updated blog categories', {
                 oldCategory: existingCategory.name,
                 newCategory: name.trim()
@@ -232,7 +232,7 @@ const deleteCategory = catchAsync(async (req, res) => {
 
     // Check if there are blogs using this category
     const blogCount = await Blog.countDocuments({ category: category.name });
-    
+
     if (blogCount > 0) {
         if (!reassignTo) {
             throw new ValidationError(
@@ -345,9 +345,9 @@ const validateCategory = catchAsync(async (req, res) => {
         throw new ValidationError('Category name is required');
     }
 
-    const category = await Category.findOne({ 
-        name: name.trim(), 
-        isActive: true 
+    const category = await Category.findOne({
+        name: name.trim(),
+        isActive: true
     });
 
     res.status(200).json({

@@ -35,8 +35,8 @@ function UserManagement() {
         <div className="min-h-screen bg-gray-50">
 
             {/* Main content */}
-            <main className=" mx-auto py-6 sm:px-6 lg:px-8">
-                <div className="px-4 py-6 sm:px-0">
+            <main className=" mx-auto py-0 sm:px-6 lg:px-8">
+                <div className="px-4 py-0 sm:px-0">
                     {currentView === 'list' && (
                         <UserList
                             onCreateUser={handleCreateUser}

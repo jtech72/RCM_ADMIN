@@ -20,7 +20,7 @@ const upload = multer({
     fileFilter: (req, file, cb) => {
         // Basic file type validation (more detailed validation happens in service)
         const allowedMimes = [
-            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif',
             'application/pdf', 'text/plain',
             'video/mp4', 'video/webm'
         ];

@@ -50,7 +50,7 @@ function CategoryManager({
             {/* Category Selection */}
             <div>
                 <label htmlFor="category-select" className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
+                    Category <span className='text-red-500'>*</span>
                 </label>
                 <div className="flex gap-2">
                     <select
@@ -68,7 +68,7 @@ function CategoryManager({
                             </option>
                         ))}
                     </select>
-                    <button
+                    {/* <button
                         type="button"
                         onClick={() => setShowAddForm(true)}
                         disabled={disabled || loading}
@@ -76,12 +76,12 @@ function CategoryManager({
                         title="Add new category"
                     >
                         <Plus className="h-4 w-4" />
-                    </button>
+                    </button> */}
                 </div>
             </div>
 
             {/* Add New Category Form */}
-            {showAddForm && (
+            {/* {showAddForm && (
                 <div className="bg-gray-50 p-4 rounded-md border">
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Add New Category</h4>
                     <form onSubmit={handleAddCategory} className="flex gap-2">
@@ -112,16 +112,16 @@ function CategoryManager({
                         </button>
                     </form>
                 </div>
-            )}
+            )} */}
 
             {/* Note about category management */}
-            {categories.length > 0 && (
+            {/* {categories.length > 0 && (
                 <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
                     <p className="text-sm text-blue-800">
                         To edit or delete categories, use the Category Management page.
                     </p>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }

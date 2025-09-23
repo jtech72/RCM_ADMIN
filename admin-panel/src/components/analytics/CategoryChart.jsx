@@ -103,14 +103,14 @@ function CategoryChart({ data, loading, chartType = 'bar' }) {
 
     return (
         <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
+            {/* <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
                     Category Performance
                 </h3>
                 <div className="text-sm text-gray-500">
                     {data.length} categories
                 </div>
-            </div>
+            </div> */}
 
             {chartType === 'pie' ? (
                 <div className="h-80">

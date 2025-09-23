@@ -9,8 +9,7 @@ const blogSchema = new mongoose.Schema(
         title: {
             type: String,
             required: [true, 'Blog title is required'],
-            trim: true,
-            maxlength: [200, 'Title cannot exceed 200 characters']
+            trim: true
         },
 
         slug: {
@@ -28,8 +27,7 @@ const blogSchema = new mongoose.Schema(
 
         excerpt: {
             type: String,
-            required: [true, 'Blog excerpt is required'],
-            maxlength: [500, 'Excerpt cannot exceed 500 characters']
+            required: [true, 'Blog excerpt is required']
         },
 
         coverImage: {
@@ -79,12 +77,10 @@ const blogSchema = new mongoose.Schema(
         // SEO Metadata
         seoMetadata: {
             metaTitle: {
-                type: String,
-                maxlength: [60, 'Meta title cannot exceed 60 characters']
+                type: String
             },
             metaDescription: {
-                type: String,
-                maxlength: [160, 'Meta description cannot exceed 160 characters']
+                type: String
             },
             keywords: [{
                 type: String,

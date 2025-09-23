@@ -23,8 +23,14 @@ function BlogList({ onCreateBlog, onEditBlog }) {
         page: 1,
         limit: 10,
         total: 0,
-        pages: 0
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false,
+        nextPage: null,
+        prevPage: null
     });
+
+    console.log(pagination, 'paginationpagination')
 
     // Filter and search states
     const [filters, setFilters] = useState({
@@ -61,7 +67,8 @@ function BlogList({ onCreateBlog, onEditBlog }) {
 
             if (response.success) {
                 setBlogs(response.data);
-                setPagination(response.pagination || pagination);
+                console.log(response, 'responseresponseresponseresponse')
+                setPagination(response?.pagination);
             } else {
                 setError(response.error || 'Failed to load blogs');
             }
@@ -128,9 +135,9 @@ function BlogList({ onCreateBlog, onEditBlog }) {
     };
 
     // Handle toggle featured
-    const handleToggleFeatured = async (blogId) => {
+    const handleToggleFeatured = async (blogId, currentFeatured) => {
         try {
-            const response = await blogService.toggleFeatured(blogId);
+            const response = await blogService.toggleFeatured(blogId, currentFeatured);
             if (response.success) {
                 loadBlogs(); // Reload the list
             } else {
@@ -304,13 +311,10 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                         Status
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Author
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Stats
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
+                                        Created On
                                     </th>
                                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Actions
@@ -319,8 +323,8 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {blogs.map((blog) => (
-                                    <tr key={blog._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4">
+                                    <tr key={blog?._id} className="hover:bg-gray-50">
+                                        <td className="px-4 py-3">
                                             <div className="flex items-start space-x-3">
                                                 {blog.coverImage?.url && (
                                                     <img
@@ -331,29 +335,24 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                                 )}
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center space-x-2">
-                                                        <h3 className="text-sm font-medium text-gray-900 truncate">
-                                                            {blog.title}
+                                                        <h3 style={{ cursor: 'pointer' }} title={blog?.title}
+                                                            className="text-sm font-medium text-gray-800 truncate">
+                                                            {blog?.title?.length > 40 ? blog?.title?.slice?.(0, 39) + '...' : blog?.title}
                                                         </h3>
-                                                        {blog.featured && (
-                                                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                                        )}
                                                     </div>
-                                                    <p className="text-sm text-gray-500 truncate">
-                                                        {blog?.excerpt?.length > 80 ? blog?.excerpt?.slice(0, 79) + '...' : blog?.excerpt}
-                                                    </p>
                                                     {blog.tags && blog.tags.length > 0 && (
                                                         <div className="flex items-center mt-1">
                                                             <Tag className="h-3 w-3 text-gray-400 mr-1" />
                                                             <span className="text-xs text-gray-500">
-                                                                {blog.tags.slice(0, 3).join(', ')}
-                                                                {blog.tags.length > 3 && '...'}
+                                                                {blog.tags.slice(0, 2).join(', ')}
+                                                                {blog.tags.length > 2 && '...'}
                                                             </span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <select
                                                 value={blog.status}
                                                 onChange={(e) => handleStatusChange(blog._id, e.target.value)}
@@ -364,64 +363,40 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                                                 <option value="archived">Archived</option>
                                             </select>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
                                             <div className="flex items-center">
-                                                <User className="h-4 w-4 text-gray-400 mr-2" />
-                                                <span className="text-sm capitalize text-gray-900">
-                                                    {blog.author?.username || 'Unknown'}
-                                                </span>
+                                                <Eye className="h-3 w-3 mr-1" />
+                                                {blog.viewCount || 0} views
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div className="space-y-1">
-                                                <div className="flex items-center">
-                                                    <Eye className="h-3 w-3 mr-1" />
-                                                    {blog.viewCount || 0} views
-                                                </div>
-                                                <div className="flex items-center">
-                                                    <span className="text-red-500 mr-1">♥</span>
-                                                    {blog.likeCount || 0} likes
-                                                </div>
-                                            </div>
+                                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                            {formatDate(blog.createdAt)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <div className="flex items-center">
-                                                <Calendar className="h-4 w-4 mr-2" />
-                                                <div>
-                                                    <div>{formatDate(blog.createdAt)}</div>
-                                                    {blog.updatedAt !== blog.createdAt && (
-                                                        <div className="text-xs text-gray-400">
-                                                            Updated: {formatDate(blog.updatedAt)}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-2">
                                                 <button
-                                                    onClick={() => handleToggleFeatured(blog._id)}
-                                                    className={`p-1 rounded ${blog.featured
-                                                        ? 'text-yellow-600 hover:text-yellow-700'
-                                                        : 'text-gray-400 hover:text-yellow-600'
+                                                    onClick={() => handleToggleFeatured(blog._id, blog.featured)}
+                                                    className={`p-0 rounded ${blog?.featured
+                                                        ? 'text-yellow-400 hover:text-yellow-500'
+                                                        : 'text-gray-400 hover:text-yellow-500'
                                                         }`}
                                                     title={blog.featured ? 'Remove from featured' : 'Mark as featured'}
                                                 >
-                                                    <Star className={`h-4 w-4 ${blog.featured ? 'fill-current' : ''}`} />
+                                                    <Star className={`h-3 w-3 ${blog.featured ? 'fill-current' : ''}`} />
                                                 </button>
                                                 <button
                                                     onClick={() => onEditBlog(blog)}
-                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                                                    className="text-blue-600 hover:text-blue-900 p-0 rounded"
                                                     title="Edit blog"
                                                 >
-                                                    <Edit className="h-4 w-4" />
+                                                    <Edit className="h-3 w-3" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteBlog(blog._id, blog.title)}
-                                                    className="text-red-600 hover:text-red-900 p-1 rounded"
+                                                    className="text-red-600 hover:text-red-900 p-0 rounded"
                                                     title="Delete blog"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-3 w-3" />
                                                 </button>
                                             </div>
                                         </td>
@@ -431,81 +406,41 @@ function BlogList({ onCreateBlog, onEditBlog }) {
                         </table>
                     </div>
                 )}
+                {/* Pagination */}
+                {pagination && pagination.totalPages > 1 && (
+                    <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div className="text-sm text-gray-700">
+                            Showing {((pagination.page - 1) * pagination.limit) + 1}
+                            to {Math.min(pagination.page * pagination.limit, pagination.total)}
+                            of {pagination.total} results
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => handlePageChange(pagination.prevPage)}
+                                disabled={!pagination.hasPrevPage}
+                                className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Previous
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Page {pagination.page} of {pagination.totalPages}
+                            </span>
+                            <button
+                                onClick={() => handlePageChange(pagination.nextPage)}
+                                disabled={!pagination.hasNextPage}
+                                className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
             </div>
 
-            {/* Pagination */}
-            {pagination.pages > 1 && (
-                <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow">
-                    <div className="flex-1 flex justify-between sm:hidden">
-                        <button
-                            onClick={() => handlePageChange(pagination.page - 1)}
-                            disabled={pagination.page <= 1}
-                            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Previous
-                        </button>
-                        <button
-                            onClick={() => handlePageChange(pagination.page + 1)}
-                            disabled={pagination.page >= pagination.pages}
-                            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Next
-                        </button>
-                    </div>
-                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                        <div>
-                            <p className="text-sm text-gray-700">
-                                Showing{' '}
-                                <span className="font-medium">
-                                    {(pagination.page - 1) * pagination.limit + 1}
-                                </span>{' '}
-                                to{' '}
-                                <span className="font-medium">
-                                    {Math.min(pagination.page * pagination.limit, pagination.total)}
-                                </span>{' '}
-                                of{' '}
-                                <span className="font-medium">{pagination.total}</span> results
-                            </p>
-                        </div>
-                        <div>
-                            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                                <button
-                                    onClick={() => handlePageChange(pagination.page - 1)}
-                                    disabled={pagination.page <= 1}
-                                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <ChevronLeft className="h-5 w-5" />
-                                </button>
 
-                                {/* Page numbers */}
-                                {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
-                                    const pageNum = i + 1;
-                                    return (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() => handlePageChange(pageNum)}
-                                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === pagination.page
-                                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                                                }`}
-                                        >
-                                            {pageNum}
-                                        </button>
-                                    );
-                                })}
-
-                                <button
-                                    onClick={() => handlePageChange(pagination.page + 1)}
-                                    disabled={pagination.page >= pagination.pages}
-                                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <ChevronRight className="h-5 w-5" />
-                                </button>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
