@@ -1,0 +1,31 @@
+name: RCM-PRO-BILL-BLOGGING CI
+
+on:
+  push:
+    branches: [ "main"]
+
+jobs:
+
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Copy the pre-existing .env file from the backup location to the project directory
+    - name: Copy backend .env file from backup
+      run: |
+        cp /var/www/env-backups/.env.rcm_blogging /var/www/blogging-rcm-runner/_work/RCM_ADMIN/RCM_ADMIN/backend/.env
+        echo ".env file copied from backup."
+
+    - name: Copy frontend .env file from backup
+      run: |
+        cp /var/www/env-backups/.env.rcm_blogging /var/www/blogging-rcm-runner/_work/RCM_ADMIN/RCM_ADMIN/admin-panel/.env.production
+        echo ".env file copied from backup."
+
+    - name: Set execute permission for deploy.sh
+      run: docker-compose -f docker-compose.prod.yml up -d --build
+
+    - name: Remove build cache
+      run: docker system prune -a -f

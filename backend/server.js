@@ -106,6 +106,19 @@ app.get('/health', (req, res) => {
     });
 });
 
+let contactRoutes;
+try {
+    contactRoutes = require('./routes/contactRoutes');
+    console.log('Contact routes loaded');
+} catch (error) {
+    console.error('Error loading contact routes:', error.message);
+    process.exit(1);
+}
+
+// Later, in your routes section:
+app.use('/api/contact', contactRoutes);
+
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/blogs', blogRoutes);
