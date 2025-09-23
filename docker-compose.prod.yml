@@ -1,97 +1,15 @@
-version: "3.8"
-
+version: '2'
 services:
-  # Backend API Service
-  backend:
+  rcm_blogging_backend:
+    container_name: web_rcm_blogging_backend
     build:
-      context: .
-      dockerfile: Dockerfile.backend
-    container_name: blogging-backend
-    restart: unless-stopped
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
-    environment:
-      - NODE_ENV=production
-    env_file:
-      - backend/.env.production
-    volumes:
-      - ./backend/logs:/app/logs
-    networks:
-      - blogging-network
-    depends_on:
-      - mongodb
-    healthcheck:
-      test: ["CMD", "node", "utils/healthCheck.js"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # Admin Panel Service
-  admin-panel:
-    build:
-      context: .
-      dockerfile: Dockerfile.admin
-    container_name: blogging-admin
-    restart: unless-stopped
+      - "52001:52001"
+  rcm_blogging_frontend:
+    build: ./admin-panel
+    container_name: rcm_blogging_frontend
     ports:
-      - "3001:80"
-    networks:
-      - blogging-network
-    depends_on:
-      - backend
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://localhost/health",
-        ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  # MongoDB Service (for development/testing)
-  mongodb:
-    image: mongo:7.0
-    container_name: blogging-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: blogging-system
-    volumes:
-      - mongodb_data:/data/db
-      - ./mongodb-init:/docker-entrypoint-initdb.d
-    networks:
-      - blogging-network
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: blogging-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    networks:
-      - blogging-network
-    depends_on:
-      - backend
-      - admin-panel
-
-volumes:
-  mongodb_data:
-    driver: local
-
-networks:
-  blogging-network:
-    driver: bridge
+      - "52002:80"
+    restart: always
