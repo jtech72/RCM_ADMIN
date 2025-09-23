@@ -21,7 +21,7 @@ jobs:
 
     - name: Copy frontend .env file from backup
       run: |
-        cp /var/www/env-backups/.env.rcm_blogging /var/www/blogging-rcm-runner/_work/RCM_ADMIN/RCM_ADMIN/admin-panel/.env
+        cp /var/www/env-backups/.env.rcm_blogging /var/www/blogging-rcm-runner/_work/RCM_ADMIN/RCM_ADMIN/admin-panel/.env.production
         echo ".env file copied from backup."
 
     - name: Set execute permission for deploy.sh
