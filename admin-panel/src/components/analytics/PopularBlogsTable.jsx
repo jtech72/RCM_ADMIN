@@ -38,7 +38,6 @@ function PopularBlogsTable({ data, loading, title = "Most Popular Blogs" }) {
                     <tr className="border-b border-gray-200">
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">#</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Title</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Author</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Views</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Status</th>
                     </tr>
@@ -54,9 +53,6 @@ function PopularBlogsTable({ data, loading, title = "Most Popular Blogs" }) {
                                     <div className="text-sm text-gray-900 truncate">{blog.title}</div>
                                     <div className="text-xs text-gray-500">{blog.category}</div>
                                 </div>
-                            </td>
-                            <td className="px-3 capitalize py-2">
-                                <span className="text-sm text-gray-900">{blog.author?.username || 'Unknown'}</span>
                             </td>
                             <td className="px-3 py-2">
                                 <span className="text-sm text-gray-900">{blog.viewCount.toLocaleString()}</span>

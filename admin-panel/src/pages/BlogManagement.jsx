@@ -32,7 +32,7 @@ function BlogManagement() {
     };
 
     return (
-        <div className="mx-auto py-6 pt-0 sm:px-6 lg:px-8">
+        <div className="mx-auto max-h-screen overflow-auto py-6 pt-0 sm:px-6 lg:px-8">
             <div className="px-4 py-6 pt-0 sm:px-0">
                 {currentView === 'list' && (
                     <BlogList

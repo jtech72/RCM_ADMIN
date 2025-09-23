@@ -133,7 +133,7 @@ const getBlogs = async (req, res) => {
     try {
         const {
             page = 1,
-            limit = 10,
+            limit = 3,
             status,
             category,
             tags,

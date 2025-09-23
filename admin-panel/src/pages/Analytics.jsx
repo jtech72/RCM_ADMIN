@@ -41,7 +41,7 @@ function Analytics() {
 
     // Chart configuration
     const [chartConfig, setChartConfig] = useState({
-        engagementPeriod: 'week',
+        engagementPeriod: 'day',
         engagementChartType: 'line',
         categoryChartType: 'bar'
     });
@@ -162,13 +162,13 @@ function Analytics() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="max-h-screen overflow-auto  from-slate-50 via-blue-50 to-indigo-100">
             {/* Animated Background Elements */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+            {/* <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-yellow-400 to-red-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
                 <div className="absolute top-40 left-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-green-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
-            </div>
+            </div> */}
 
             {/* Header Section */}
             {/* <div className="relative z-10 bg-white/80 backdrop-blur-sm border-b border-white/20 shadow-lg">
@@ -234,7 +234,7 @@ function Analytics() {
 
                 {/* Engagement Chart */}
                 <div className="mb-6">
-                    <div className="bg-white rounded-lg shadow border p-4 mb-4">
+                    <div className="bg-white rounded-lg shadow border p-3 mb-0">
                         <div className="flex items-center justify-between flex-wrap gap-4">
                             <h3 className="text-sm font-medium text-gray-900">Engagement Trends</h3>
                             <div className="flex items-center gap-4 flex-wrap">
@@ -243,7 +243,7 @@ function Analytics() {
                                     <select
                                         value={chartConfig.engagementPeriod}
                                         onChange={(e) => handleEngagementPeriodChange(e.target.value)}
-                                        className="px-2 py-1 border border-gray-300 rounded text-sm"
+                                        className="px-3 py-1 border border-gray-300 rounded text-sm"
                                     >
                                         <option value="day">Daily</option>
                                         <option value="week">Weekly</option>
@@ -255,7 +255,7 @@ function Analytics() {
                                     <select
                                         value={chartConfig.engagementChartType}
                                         onChange={(e) => handleEngagementChartTypeChange(e.target.value)}
-                                        className="px-2 py-1 border border-gray-300 rounded text-sm"
+                                        className="px-3 py-1 border border-gray-300 rounded text-sm"
                                     >
                                         <option value="line">Line Chart</option>
                                         <option value="bar">Bar Chart</option>
@@ -275,9 +275,9 @@ function Analytics() {
                 </div>
 
                 {/* Blog Tables */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 mb-6">
                     <div className="bg-white rounded-lg shadow border">
-                        <div className="p-4 border-b">
+                        <div className="p-3 border-b">
                             <h3 className="text-sm font-medium text-gray-900">Most Popular Blogs</h3>
                         </div>
                         <PopularBlogsTable
@@ -286,34 +286,24 @@ function Analytics() {
                             title="Most Popular Blogs (by Views)"
                         />
                     </div>
-                    <div className="bg-white rounded-lg shadow border">
-                        <div className="p-4 border-b">
-                            <h3 className="text-sm font-medium text-gray-900">Most Liked Blogs</h3>
-                        </div>
-                        <PopularBlogsTable
-                            data={analyticsData.likedBlogs}
-                            loading={loading.likedBlogs}
-                            title="Most Liked Blogs"
-                        />
-                    </div>
                 </div>
 
                 {/* Category Chart */}
                 <div className="mb-6">
-                    <div className="bg-white rounded-lg shadow border p-4 mb-4">
+                    <div className="bg-white rounded-lg shadow border p-3 mb-0">
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-medium text-gray-900">Category Performance</h3>
-                            <div className="flex items-center gap-2">
+                            {/* <div className="flex items-center gap-2">
                                 <label className="text-sm text-gray-600">Chart Type:</label>
                                 <select
                                     value={chartConfig.categoryChartType}
                                     onChange={(e) => handleCategoryChartTypeChange(e.target.value)}
-                                    className="px-2 py-1 border border-gray-300 rounded text-sm"
+                                    className="px-3 py-1 border border-gray-300 rounded text-sm"
                                 >
                                     <option value="bar">Bar Chart</option>
                                     <option value="pie">Pie Chart</option>
                                 </select>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                     <div className="bg-white rounded-lg shadow border overflow-hidden">

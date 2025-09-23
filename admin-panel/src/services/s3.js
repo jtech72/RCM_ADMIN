@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://192.168.0.109:5000/api';
 
 /**
  * S3 Service for handling file uploads and management
@@ -60,21 +60,21 @@ class S3Service {
      */
     async uploadFile(file, folder = 'uploads', onProgress = null) {
         try {
-            console.log('s3Service.uploadFile called with:', { 
-                fileName: file.name, 
-                contentType: file.type, 
-                fileSize: file.size, 
+            console.log('s3Service.uploadFile called with:', {
+                fileName: file.name,
+                contentType: file.type,
+                fileSize: file.size,
                 folder,
                 apiBaseUrl: this.api.defaults.baseURL
             });
-            
+
             // Check if we have auth token
             const token = localStorage.getItem('adminToken');
             if (!token) {
                 throw new Error('Authentication token not found. Please login again.');
             }
             console.log('Auth token found:', token ? 'Yes' : 'No');
-            
+
             // Get presigned URL
             console.log('Getting presigned URL...');
             const presignedData = await this.getPresignedUrl({
@@ -92,16 +92,16 @@ class S3Service {
             }
 
             const { uploadUrl, fileUrl, fileKey } = presignedData.data;
-            
+
             if (!uploadUrl || !fileUrl || !fileKey) {
                 console.error('Missing required data in presigned response:', presignedData.data);
                 throw new Error('Invalid presigned URL response - missing required fields');
             }
-            
-            console.log('Upload URL obtained:', { 
-                uploadUrl: uploadUrl.substring(0, 100) + '...', 
-                fileUrl, 
-                fileKey 
+
+            console.log('Upload URL obtained:', {
+                uploadUrl: uploadUrl.substring(0, 100) + '...',
+                fileUrl,
+                fileKey
             });
 
             // Upload file to S3 using presigned URL
@@ -141,10 +141,10 @@ class S3Service {
             }
         } catch (error) {
             console.error('Error uploading file:', error);
-            
+
             // Provide more specific error messages
             let errorMessage = 'Failed to upload file';
-            
+
             if (error.response) {
                 console.error('Error response:', error.response.status, error.response.data);
                 if (error.response.status === 401) {
@@ -162,7 +162,7 @@ class S3Service {
             } else {
                 errorMessage = error.message;
             }
-            
+
             return {
                 success: false,
                 error: errorMessage

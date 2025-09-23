@@ -42,7 +42,7 @@ function DateRangePicker({ startDate, endDate, onStartDateChange, onEndDateChang
                             type="date"
                             value={formatDateForInput(startDate)}
                             onChange={(e) => handleDateChange(e.target.value, onStartDateChange)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                            className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-200"
                         />
                     </div>
 
@@ -55,14 +55,14 @@ function DateRangePicker({ startDate, endDate, onStartDateChange, onEndDateChang
                             type="date"
                             value={formatDateForInput(endDate)}
                             onChange={(e) => handleDateChange(e.target.value, onEndDateChange)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                            className="px-3 py-1 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm hover:shadow-md transition-all duration-200"
                         />
                     </div>
 
                     {(startDate || endDate) && (
                         <button
                             onClick={onClear}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 border border-gray-200 rounded-lg hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                            className="flex items-center gap-2 px-2 py-1 text-sm text-gray-600 hover:text-red-600 border border-gray-200 rounded-lg hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                             <X className="w-4 h-4" />
                             <span>Clear</span>

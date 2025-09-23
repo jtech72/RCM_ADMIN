@@ -97,15 +97,6 @@ function EngagementChart({ data, loading, period = 'week', chartType = 'line' })
 
     return (
         <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
-                    Engagement Trends
-                </h3>
-                <div className="text-sm text-gray-500">
-                    Period: {period}
-                </div>
-            </div>
-
             <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                     <ChartComponent data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
